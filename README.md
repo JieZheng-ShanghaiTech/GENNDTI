@@ -30,7 +30,9 @@
 
 ## Prepare for training'
 
-go to GENNDTI folder
+Go to GENNDTI folder
+$ cd GENNDTI
+
 Run ```Prepare.py``` to generate the dataset and the coresponding split.
 ```angular2html
 $ python prepare.py
