@@ -32,7 +32,7 @@ class GMCF(nn.Module):
             pass
 
         if self.cross_choice == 0:
-            self.outer_gnn = inner_GNN(self.dim, self.hidden_layer)
+            self.outer_gnn = cross_GNN(self.dim, self.hidden_layer)
         elif self.cross_choice == 1:
             print("cross choice is gcn")
             self.outer_gnn = standard_GCN(self.dim, self.hidden_layer, self.dim)
