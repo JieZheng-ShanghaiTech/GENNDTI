@@ -1,6 +1,12 @@
 
 # GENNDTI : Graph Enhanced Neural Network for drug-target interaction prediction
 
+* This is the code for our paper "GENNDTI : Graph Enhanced Neural Network for drug-target interaction prediction''.
+* GENNDTI consists of three parts: (1) a graph enhancement module that processes the sub-interaction construction, (2) a message-generating module that uses both real interactions and sub-interactions, and (3) an inference module that fuses the information obtained from step 2 for prediction.
+
+## Overview 
+ ![graph model](model.png "GENNDTI")
+
 ## Environmental Requirement
 
 
@@ -29,11 +35,6 @@
   ```
 
 ## Prepare for training'
-
-Go to GENNDTI folder
-```
-$ cd GENNDTI
-```
 Run ```Prepare.py``` to generate the dataset and the coresponding split.
 ```angular2html
 $ python prepare.py
@@ -70,8 +71,12 @@ get a summary is listed in the below.
 The training result will be recorded in the ```code/train_res_{YOUR_DATASET}```
 There are blocks in ```stat.py``` to get the final result and give a simple report in ```code\summary.txt```.
 You can refer to the code for detail.
- 
 
+## Acknowledgement
+
+The code is inspired by GMCF. 
+> [Neural Graph Matching based Collaborative Filtering](https://dl.acm.org/doi/abs/10.1145/3404835.3462833)  
+> Su, Yixin, et al. "Neural graph matching based collaborative filtering." Proceedings of the 44th international ACM SIGIR conference on research and development in information retrieval. 2021.
 
 
 
