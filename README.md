@@ -75,10 +75,10 @@ You can refer to the code for detail.
 ## Acknowledgement
 
 The code is inspired by GMCF. 
+```
 > [Neural Graph Matching based Collaborative Filtering](https://dl.acm.org/doi/abs/10.1145/3404835.3462833)  
-> Su, Yixin, et al. "Neural graph matching based collaborative filtering." Proceedings of the 44th international ACM SIGIR conference on research and development in information retrieval. 2021.
-
-
+> Su, Yixin, et al. "Neural graph matching based collaborative filtering." Proceedings of the 44th international ACM SIGIR conference on research and development in information retrieval. 2
+```
 
 
 
