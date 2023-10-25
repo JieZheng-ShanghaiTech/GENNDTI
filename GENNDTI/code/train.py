@@ -70,8 +70,7 @@ def train(args, data_info, t):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = 'cpu'
 
-    model = GMCF(args, feature_num, device)
-    model = model.to(device)
+    model = GENNDTI(args, feature_num, device)    model = model.to(device)
 
     newlist = list(filter(lambda n: n % 2 == 1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
     newlist = list(x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] if x % 2 == 1)
