@@ -4,13 +4,13 @@ import pandas as pd
 from layers import *
 
 
-class GMCF(nn.Module):
+class GENNDTI(nn.Module):
     """
-    GMCF main model
+    GENNDTI main model
     """
 
     def __init__(self, args, n_features, device):
-        super(GMCF, self).__init__()
+        super(GENNDTI, self).__init__()
 
         self.n_features = n_features
         self.dim = args.dim
@@ -25,7 +25,7 @@ class GMCF(nn.Module):
             self.inner_gnn = inner_GNN(self.dim, self.hidden_layer)
         elif self.inner_choice == 1:
             print("inner choice is gcn")
-            self.inner_gnn = standard_GCN(self.dim, self.hidden_layer, self.dim)
+            self.inner_gnn = standard_GCN1(self.dim, self.hidden_layer, self.dim)
         elif self.inner_choice == 2:
             self.inner_gnn = GAT(self.dim, self.hidden_layer, self.dim)
         elif self.inner_choice == 3:
@@ -41,11 +41,30 @@ class GMCF(nn.Module):
         elif self.cross_choice == 3:
             pass
 
+        # self.feature_embedding.weight.data.normal_(0.0,0.01)
+
         ###################
         drug_embed = pd.read_pickle(f'../data/{args.dataset}/drug_bind.pkl')
         target_embed = pd.read_pickle(f'../data/{args.dataset}/target_bind.pkl')
+        # fp = drug_embed['fp']
+        fp = np.random.normal(size=(len(drug_embed), 64))
+        sec = np.random.normal(size=(len(target_embed), 64))
+        if args.dataset=='davis':
+            sec = target_embed['emb']
+            pre_train = np.concatenate([fp, np.array(sec.to_list())])
+        elif args.dataset=='KIBA':
+            # fp = drug_embed
+            # sec = target_embed
+            pre_train = np.concatenate([np.array(fp), np.array(sec)])
+        # pre_train = np.array(pd.concat([fp, sec]).to_list())
 
-        pre_train = np.random.normal(size=(self.n_features+1, 64))
+        pad_num = self.n_features + 1 - len(pre_train)
+        print(self.n_features)
+        if pad_num != 0:
+            pad = np.random.normal(size=(pad_num, 64))
+            pre_train = np.concatenate([pre_train, pad])
+
+        # pre_train = np.random.normal(size=(self.n_features+1, 64))
         pre_train = pre_train.astype(np.float32)
         ###########################################
         self.feature_embedding = nn.Embedding.from_pretrained((torch.from_numpy(pre_train)))
@@ -71,6 +90,8 @@ class GMCF(nn.Module):
         outer_edge_index = torch.transpose(data.edge_attr, 0, 1)
         outer_edge_index = self.outer_offset(batch, self.num_user_features, outer_edge_index)
 
+        # outer_node_message = self.outer_gnn(node_emb, outer_edge_index)
+
         inner_node_message = self.inner_gnn(node_emb, inner_edge_index)
         outer_node_message = self.outer_gnn(node_emb, outer_edge_index)
         # aggregate all message
@@ -79,19 +100,26 @@ class GMCF(nn.Module):
             inner_node_message = inner_node_message.unsqueeze(1)
         updated_node_input = torch.cat((node_emb, inner_node_message, outer_node_message), 1)
         updated_node_input = torch.transpose(updated_node_input, 0, 1)
-
+        # print("**********node,inner,outer",node_emb.shape,inner_node_message.shape,outer_node_message.shape)
+        # print('updated_node_input',updated_node_input.shape)
+        
         gru_h0 = torch.normal(0, 0.01, (1, node_emb.size(0), self.dim)).to(self.device)
         gru_output, hn = self.update_f(updated_node_input, gru_h0)
         updated_node = gru_output[-1]  # [batch_size*n_node, dim]
-
+        # print('updated_node',updated_node.shape)
+        
         new_batch = self.split_batch(batch, self.num_user_features)
         updated_graph = torch.squeeze(global_mean_pool(updated_node, new_batch))
         item_graphs, user_graphs = torch.split(updated_graph, int(updated_graph.size(0) / 2))
-
+        # print('updated_graph',updated_graph.shape)
+        # print('item_graphs, user_graphs',item_graphs.shape, user_graphs.shape)
         
         y = torch.unsqueeze(torch.sum(user_graphs * item_graphs, 1) + sum_weight, 1)
+        # print('y.unsqueeze',y.shape)
         y = torch.sigmoid(y)
-
+        # print('y',y.shape)
+        # if not torch.squeeze(y)==Tensor([]):
+        #     print(f'{user_graphs}, {item_graphs}, {sum_weight}')
         return y
 
     def split_batch(self, batch, user_node_num):
@@ -117,6 +145,7 @@ class GMCF(nn.Module):
         # outer_edge_index_offset = outer_edge_index + offset_list
         outer_edge_index_offset = torch.cat((outer_edge_index, offset_list), dim=-1)
         return outer_edge_index_offset
+
 
 
 
