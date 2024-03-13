@@ -174,14 +174,16 @@ def evaluate(model, data_loader, device):
     ndcg5 = cal_ndcg(predictions, labels, user_ids, 5)
     mse = mean_squared_error(labels, predictions)
     ci = concordance_index(labels, predictions)
-    aupr = average_precision_score(labels, predictions)
-    auc = roc_auc_score(labels, predictions)
+    precision_1, recall_1, _ = precision_recall_curve(labels, predictions)  # 计算Precision和Recall
+    aupr = auc(recall_1, precision_1)  # 计算AUPR值
+    # aupr = average_precision_score(labels, predictions)
+    auc_roc = roc_auc_score(labels, predictions)
     logloss = log_loss(labels, predictions)
     recall = recall_score(labels, predictions2, average='binary')
     precision = precision_score(labels, predictions2, average='binary')
     accuracy = accuracy_score(labels, predictions2)
     r2 = r2_score(labels, predictions)
-    return auc, logloss, mse, ci, aupr, ndcg20, ndcg10, ndcg5, recall, precision, accuracy, r2
+    return auc_roc, logloss, mse, ci, aupr, ndcg20, ndcg10, ndcg5, recall, precision, accuracy, r2
 
 
 def cal_ndcg(predicts, labels, user_ids, k):
